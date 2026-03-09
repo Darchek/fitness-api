@@ -4,14 +4,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routers import cardio, strength, bike, workouts, weight, habits, stats, auth
+import logging
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+log = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Fitness API", lifespan=lifespan)
+app = FastAPI(title="Fitness API", lifespan=lifespan, root_path="/api")
 
 # CORS
 origins = settings.allowed_origins_list

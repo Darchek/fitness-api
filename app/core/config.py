@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = ""
     SECRET_KEY: str = ""
     ALLOWED_ORIGINS: str = "*"
+    N8N_WEBHOOK_URL: str = ""
+    N8N_WEBHOOK_URL_DEV: str = ""
 
     @property
     def allowed_origins_list(self) -> List[str]:

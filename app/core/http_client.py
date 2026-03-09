@@ -1,0 +1,35 @@
+import asyncio
+
+import requests
+from app.core.config import settings
+import logging
+
+log = logging.getLogger(__name__)
+
+class HttpClient:
+
+
+    @staticmethod
+    async def send_n8n_start_bike_session():
+        try:
+            response = requests.get(f"{settings.N8N_WEBHOOK_URL}/bike/start")
+            data = response.json()
+            log.info(data)
+            return True
+        except Exception as e:
+            log.error(f"Request error: {e}")
+            return False
+
+    @staticmethod
+    async def send_n8n_end_bike_session():
+        try:
+            response = requests.post(f"{settings.N8N_WEBHOOK_URL_DEV}/bike/end")
+            data = response.json()
+            log.info(data)
+            return True
+        except Exception as e:
+            log.error(f"Request error: {e}")
+            return False
+
+if __name__ == "__main__":
+    asyncio.run(HttpClient.send_n8n_end_bike_session())
