@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, field_serializer
 from typing import Optional, List
 from datetime import date, datetime
 from app.schemas.bike import BikeMetricBase

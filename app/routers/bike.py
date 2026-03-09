@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import joinedload
 from typing import List
+
+from app.core.http_client import HttpClient
 from app.schemas.cardio import BikeSessionListOut, CardioWorkoutResponse, CardioBikeSessionCreate
 from app.db.models import CardioWorkout
 from app.db.models.bike_metrics import BikeMetric
@@ -44,6 +46,11 @@ async def list_bike_sessions(
     result = await db.execute(q)
     return [BikeSessionListOut(**dict(row)) for row in result.mappings().all()]
 
+@router.get("/start")
+async def start_bike_session():
+    await HttpClient.send_n8n_start_bike_session()
+    return "OK"
+
 
 @router.get("/{_id}", response_model=CardioWorkoutResponse)
 async def get_bike_session(_id: int, db: AsyncSession = Depends(get_db)):
@@ -58,7 +65,9 @@ async def create_bike_session(payload: CardioBikeSessionCreate, db: AsyncSession
     db.add(workout)
     await db.commit()
     await db.refresh(workout)
+    await HttpClient.send_n8n_end_bike_session(payload.model_dump(mode="json"))
     return await get_by_id(workout.id, db)
+
 
 
 async def get_by_id(_id: int, db: AsyncSession):
@@ -70,3 +79,24 @@ async def get_by_id(_id: int, db: AsyncSession):
     )
     row = result.scalars().first()
     return row
+
+
+"""
+    data = {
+        "type": "cycling",
+        "workout_date": "2026-03-19T22:30:46.202Z",
+        "distance_km": 10,
+        "duration_min": 10,
+        "avg_speed_kmh": 10,
+        "calories": 120,
+        "notes": "",
+        "metrics": [
+            {"idx": 1, "speed": 10.11, "distance": 12.23, "cadence": 23, "resistance": 2, "heart_rate": 120,
+                "calories": 12},
+            {"idx": 2, "speed": 10.12, "distance": 12.23, "cadence": 23, "resistance": 2, "heart_rate": 120,
+                "calories": 12},
+            {"idx": 3, "speed": 10.13, "distance": 12.23, "cadence": 23, "resistance": 2, "heart_rate": 120,
+                "calories": 12}
+        ]
+    }
+"""
