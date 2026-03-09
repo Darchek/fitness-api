@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Text, func
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Text, func, Computed
 from app.db.base import Base
 
 
@@ -10,7 +10,7 @@ class StrengthWorkout(Base):
     exercise = Column(String, nullable=False)
     sets = Column(Integer)
     reps_per_set = Column(Integer)
-    total_reps = Column(Integer)
+    total_reps = Column(Integer, Computed("sets * reps_per_set", persisted=True))
     weight_kg = Column(Float)
     duration_sec = Column(Integer)
     notes = Column(Text)

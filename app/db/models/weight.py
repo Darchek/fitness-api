@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, DateTime, func
+from sqlalchemy import Column, Integer, Float, DateTime, func, Text
 from app.db.base import Base
 
 
@@ -7,4 +7,6 @@ class WeightLog(Base):
 
     id = Column(Integer, primary_key=True)
     measured_at = Column(DateTime, nullable=False)
-    value = Column(Float, nullable=False)
+    value = Column("weight_kg", Float, nullable=False)
+    notes = Column(Text)
+    created_at = Column(DateTime, server_default=func.now())

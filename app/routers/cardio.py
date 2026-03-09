@@ -6,12 +6,12 @@ from datetime import date
 
 from app.db.session import get_db
 from app.db.models.cardio import CardioWorkout
-from app.schemas.cardio import CardioWorkoutResponse, CardioCreate
+from app.schemas.cardio import CardioBase, CardioCreate
 
 router = APIRouter(prefix="/api/cardio", tags=["cardio"])
 
 
-@router.get("", response_model=List[CardioWorkoutResponse])
+@router.get("", response_model=List[CardioBase])
 async def list_cardio(
     from_date: Optional[date] = Query(None, alias="from"),
     to_date: Optional[date] = Query(None, alias="to"),
@@ -32,7 +32,7 @@ async def list_cardio(
     return result.scalars().all()
 
 
-@router.post("", response_model=CardioWorkoutResponse, status_code=201)
+@router.post("", response_model=CardioBase, status_code=201)
 async def create_cardio(payload: CardioCreate, db: AsyncSession = Depends(get_db)):
     workout = CardioWorkout(**payload.model_dump())
     db.add(workout)

@@ -19,7 +19,7 @@ async def authenticate(payload: AuthRequest, db: AsyncSession = Depends(get_db))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if user["role"] == "viewer":
+    if user["role"] == "user":
         return AuthResponse(user=UserOut(username=user["username"], role=user["role"]))
 
     # admin requires password

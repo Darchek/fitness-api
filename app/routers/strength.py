@@ -6,12 +6,12 @@ from datetime import date
 
 from app.db.session import get_db
 from app.db.models.strength import StrengthWorkout
-from app.schemas.strength import StrengthOut, StrengthCreate
+from app.schemas.strength import StrengthWorkoutResponse, StrengthCreate
 
 router = APIRouter(prefix="/api/strength", tags=["strength"])
 
 
-@router.get("", response_model=List[StrengthOut])
+@router.get("", response_model=List[StrengthWorkoutResponse])
 async def list_strength(
     from_date: Optional[date] = Query(None, alias="from"),
     to_date: Optional[date] = Query(None, alias="to"),
@@ -28,7 +28,7 @@ async def list_strength(
     return result.scalars().all()
 
 
-@router.post("", response_model=StrengthOut, status_code=201)
+@router.post("", response_model=StrengthWorkoutResponse, status_code=201)
 async def create_strength(payload: StrengthCreate, db: AsyncSession = Depends(get_db)):
     workout = StrengthWorkout(**payload.model_dump())
     db.add(workout)

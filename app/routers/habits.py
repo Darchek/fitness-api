@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from typing import List, Optional
 from datetime import date
 
@@ -24,6 +24,6 @@ async def list_habits(
     if to_date:
         q = q.where(HabitLog.event_date <= to_date)
     if habit:
-        q = q.where(HabitLog.habit == habit)
+        q = q.where(and_(HabitLog.habit == habit))
     result = await db.execute(q)
     return result.scalars().all()
