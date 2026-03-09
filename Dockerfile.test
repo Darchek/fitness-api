@@ -1,0 +1,8 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt pytest httpx
+COPY . .
+ENV DATABASE_URL=postgresql://test:test@localhost/test
+ENV SECRET_KEY=test-secret-key
+CMD ["pytest", "tests/", "-v", "--tb=short"]
