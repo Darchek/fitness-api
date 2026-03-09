@@ -4,7 +4,7 @@ from sqlalchemy import select, and_, func
 from sqlalchemy.orm import joinedload
 from typing import List
 
-from app.schemas.cardio import BikeSessionListOut, CardioWorkoutResponse
+from app.schemas.cardio import BikeSessionListOut, CardioWorkoutResponse, CardioBikeSessionCreate
 from app.db.models import CardioWorkout
 from app.db.models.bike_metrics import BikeMetric
 from app.db.session import get_db
@@ -48,6 +48,21 @@ async def list_bike_sessions(
 
 @router.get("/{_id}", response_model=CardioWorkoutResponse)
 async def get_bike_session(_id: int, db: AsyncSession = Depends(get_db)):
+    return get_by_id(_id, db)
+
+@router.post("", response_model=CardioWorkoutResponse)
+async def create_bike_session(payload: CardioBikeSessionCreate, db: AsyncSession = Depends(get_db)):
+    workout = CardioWorkout(
+        **payload.model_dump(exclude={"metrics"}),
+        metrics=[BikeMetric(**m.model_dump()) for m in payload.metrics]
+    )
+    db.add(workout)
+    await db.commit()
+    await db.refresh(workout)
+    return await get_by_id(workout.id, db)
+
+
+async def get_by_id(_id: int, db: AsyncSession):
     result = await db.execute(
         select(CardioWorkout)
         .options(joinedload(CardioWorkout.metrics))

@@ -17,6 +17,6 @@ class CardioWorkout(Base):
     notes = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
 
-    metrics = relationship("BikeMetric")
+    metrics = relationship("BikeMetric", cascade="all, delete-orphan")
 
 
