@@ -46,7 +46,7 @@ async def list_bike_sessions(
     return [BikeSessionListOut(**dict(row)) for row in result.mappings().all()]
 
 
-@router.get("/{id}", response_model=CardioWorkoutResponse)
+@router.get("/{_id}", response_model=CardioWorkoutResponse)
 async def get_bike_session(_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(CardioWorkout)
