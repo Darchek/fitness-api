@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import joinedload
 from typing import List
-
 from app.schemas.cardio import BikeSessionListOut, CardioWorkoutResponse, CardioBikeSessionCreate
 from app.db.models import CardioWorkout
 from app.db.models.bike_metrics import BikeMetric
