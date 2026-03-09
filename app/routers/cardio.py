@@ -2,23 +2,27 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Optional
-from datetime import date
 
+from app.core import parse_date
 from app.db.session import get_db
 from app.db.models.cardio import CardioWorkout
 from app.schemas.cardio import CardioBase, CardioCreate
 
-router = APIRouter(prefix="/api/cardio", tags=["cardio"])
+router = APIRouter(prefix="/cardio", tags=["cardio"])
+
 
 
 @router.get("", response_model=List[CardioBase])
 async def list_cardio(
-    from_date: Optional[date] = Query(None, alias="from"),
-    to_date: Optional[date] = Query(None, alias="to"),
+    from_date_str: Optional[str] = Query(None, alias="from"),
+    to_date_str: Optional[str] = Query(None, alias="to"),
     exclude: Optional[str] = Query(None),
     limit: int = Query(200),
     db: AsyncSession = Depends(get_db),
 ):
+    from_date = parse_date(from_date_str)
+    to_date = parse_date(to_date_str)
+
     q = select(CardioWorkout).order_by(CardioWorkout.workout_date.desc())
     if from_date:
         q = q.where(CardioWorkout.workout_date >= from_date)

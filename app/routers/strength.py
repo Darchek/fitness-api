@@ -4,20 +4,24 @@ from sqlalchemy import select
 from typing import List, Optional
 from datetime import date
 
+from app.core import parse_date
 from app.db.session import get_db
 from app.db.models.strength import StrengthWorkout
 from app.schemas.strength import StrengthWorkoutResponse, StrengthCreate
 
-router = APIRouter(prefix="/api/strength", tags=["strength"])
+router = APIRouter(prefix="/strength", tags=["strength"])
 
 
 @router.get("", response_model=List[StrengthWorkoutResponse])
 async def list_strength(
-    from_date: Optional[date] = Query(None, alias="from"),
-    to_date: Optional[date] = Query(None, alias="to"),
+    from_date_str: Optional[str] = Query(None, alias="from"),
+    to_date_str: Optional[str] = Query(None, alias="to"),
     limit: int = Query(200),
     db: AsyncSession = Depends(get_db),
 ):
+    from_date = parse_date(from_date_str)
+    to_date = parse_date(to_date_str)
+
     q = select(StrengthWorkout).order_by(StrengthWorkout.workout_date.desc())
     if from_date:
         q = q.where(StrengthWorkout.workout_date >= from_date)

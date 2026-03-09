@@ -1,10 +1,12 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 from app.db.session import get_db
 
-router = APIRouter(prefix="/api/stats", tags=["stats"])
+router = APIRouter(prefix="/stats", tags=["stats"])
 
 
 @router.get("")
@@ -54,11 +56,11 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
 
     # Recent workouts (10)
     recent = await db.execute(text("""
-        SELECT id, workout_date::text, type AS category, 'cardio' AS kind,
+        SELECT id, workout_date, type AS activity, 'cardio' AS category,
                distance_km, duration_min, calories
         FROM cardio_workouts
         UNION ALL
-        SELECT id, workout_date::text, exercise AS category, 'strength' AS kind,
+        SELECT id, workout_date, exercise AS activity, 'strength' AS category,
                NULL, NULL, NULL
         FROM strength_workouts
         ORDER BY workout_date DESC
@@ -68,9 +70,9 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
 
     # Cardio by type
     cardio_by_type = await db.execute(text("""
-        SELECT type, COUNT(*) AS count,
-               COALESCE(SUM(distance_km), 0) AS total_distance,
-               COALESCE(SUM(calories), 0) AS total_calories
+        SELECT type as name, COUNT(*) AS count,
+               COALESCE(SUM(distance_km), 0) AS total_km,
+               COALESCE(SUM(calories), 0) AS total_cal
         FROM cardio_workouts
         GROUP BY type
         ORDER BY count DESC
@@ -79,7 +81,7 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
 
     # Strength by exercise
     strength_by_exercise = await db.execute(text("""
-        SELECT exercise, COUNT(*) AS count,
+        SELECT exercise AS name, COUNT(*) AS count,
                COALESCE(SUM(total_reps), 0) AS total_reps
         FROM strength_workouts
         GROUP BY exercise
@@ -89,26 +91,31 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
 
     # Cardio over time (last 60 days)
     cardio_over_time = await db.execute(text("""
-        SELECT workout_date::text AS date, COUNT(*) AS count,
-               COALESCE(SUM(distance_km), 0) AS distance
+        SELECT workout_date AS date, COUNT(*) AS count,
+               COALESCE(SUM(distance_km), 0) AS distance_km,
+               COALESCE(AVG(avg_speed_kmh), 0) AS avg_speed_kmh,
+               COALESCE(SUM(calories), 0) AS calories,
+               type
         FROM cardio_workouts
         WHERE workout_date >= CURRENT_DATE - INTERVAL '60 days'
-        GROUP BY workout_date
+        GROUP BY workout_date, type
         ORDER BY workout_date
     """))
     cardio_time_rows = [dict(r) for r in cardio_over_time.mappings().all()]
 
     # Workout days (per-date categories)
     workout_days = await db.execute(text("""
-        SELECT workout_date::text AS date,
+        SELECT DATE(combined.day) AS day,
                array_agg(DISTINCT kind) AS categories
         FROM (
-            SELECT workout_date, 'cardio' AS kind FROM cardio_workouts
+            SELECT event_date AS day, habit AS kind FROM habit_logs
             UNION ALL
-            SELECT workout_date, 'strength' AS kind FROM strength_workouts
+            SELECT workout_date AS day, 'cardio' AS kind FROM cardio_workouts
+            UNION ALL
+            SELECT workout_date AS day, 'strength' AS kind FROM strength_workouts
         ) combined
-        GROUP BY workout_date
-        ORDER BY workout_date DESC
+        GROUP BY DATE(combined.day)
+        ORDER BY DATE(combined.day) ASC
     """))
     workout_day_rows = [dict(r) for r in workout_days.mappings().all()]
 
@@ -121,28 +128,30 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
         "totalWorkouts": total_cardio + total_strength,
         "totalDistance": float(t["total_distance"]),
         "totalCalories": float(t["total_calories"]),
-        "mostActiveDay": mad_row["day"] if mad_row else None,
+        "mostActiveDay": datetime.fromisoformat(mad_row["day"]).strftime("%A") if mad_row else None,
         "weeklyActivity": [
-            {**r, "total": int(r["total"]), "cardio": int(r["cardio"]), "strength": int(r["strength"])}
+            {**r, "label": r["week"][5:].replace("-", "/"), "total": int(r["total"]), "cardio": int(r["cardio"]), "strength": int(r["strength"])}
             for r in weekly_rows
         ],
         "recentWorkouts": [
-            {**r, "distance_km": float(r["distance_km"]) if r.get("distance_km") is not None else None,
-             "duration_min": float(r["duration_min"]) if r.get("duration_min") is not None else None}
+            {**r, "workout_date": r["workout_date"].isoformat(), "distance_km": float(r["distance_km"]) if r.get("distance_km") is not None else None,
+             "category": r["category"], "duration_min": float(r["duration_min"]) if r.get("duration_min") is not None else None}
             for r in recent_rows
         ],
         "cardioByType": [
-            {**r, "count": int(r["count"]), "total_distance": float(r["total_distance"]),
-             "total_calories": float(r["total_calories"])}
+            {**r, "value": int(r["count"]), "total_km": float(r["total_km"]),
+             "total_cal": float(r["total_cal"])}
             for r in cardio_type_rows
         ],
         "strengthByExercise": [
-            {**r, "count": int(r["count"]), "total_reps": int(r["total_reps"])}
+            {**r, "value": int(r["count"]), "total_reps": int(r["total_reps"])}
             for r in strength_exercise_rows
         ],
         "cardioOverTime": [
-            {**r, "count": int(r["count"]), "distance": float(r["distance"])}
+            {**r, "date": r["date"].strftime("%Y-%m-%d"), "distance_km": float(r["distance_km"])}
             for r in cardio_time_rows
         ],
-        "workoutDays": workout_day_rows,
+        "workoutDays": [
+            {**r, "day": r["day"].strftime("%Y-%m-%d"), "categories": ",".join(r["categories"]) }
+            for r in workout_day_rows],
     }

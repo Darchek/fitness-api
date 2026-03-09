@@ -7,7 +7,7 @@ from app.schemas.cardio import CardioBase, CardioWorkoutResponse
 from app.db.models import CardioWorkout
 from app.db.session import get_db
 
-router = APIRouter(prefix="/api/bike", tags=["bike"])
+router = APIRouter(prefix="/bike", tags=["bike"])
 
 
 @router.get("", response_model=List[CardioBase])
