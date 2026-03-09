@@ -43,7 +43,7 @@ pipeline {
                     sh "DOCKER_BUILDKIT=0 docker build -t ${TEST_IMAGE} ."
                     try {
                         sh "docker network create ${TEST_NET}"
-                        sh "docker run -d --name ${TEST_CTR} --network ${TEST_NET} -e DATABASE_URL=postgresql://test:test@localhost/test -e SECRET_KEY=test-secret-key ${TEST_IMAGE}"
+                        sh "docker run -d --name ${TEST_CTR} --network ${TEST_NET} -e DATABASE_URL=postgresql+asyncpg://test:test@localhost/test -e SECRET_KEY=test-secret-key ${TEST_IMAGE}"
                         sh 'sleep 10'
                         sh "docker run --rm --network ${TEST_NET} curlimages/curl:latest curl -sf --retry 5 --retry-delay 3 http://${TEST_CTR}:8000/docs -o /dev/null && echo 'Health check passed'"
                     } finally {
