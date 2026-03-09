@@ -24,6 +24,18 @@ class CardioBase(BaseModel):
     calories: Optional[int] = None
     notes: Optional[str] = None
 
+class BikeSessionListOut(CardioBase):
+    max_speed: Optional[float] = None
+    avg_cadence: Optional[float] = None
+    max_cadence: Optional[float] = None
+    avg_resistance: Optional[float] = None
+    avg_heart_rate: Optional[float] = None
+    max_heart_rate: Optional[float] = None
+    data_points: Optional[int] = None
+
+    model_config = {"from_attributes": True}
+
+
 class CardioCreate(BaseModel):
     type: str
     workout_date: date
