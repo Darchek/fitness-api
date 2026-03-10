@@ -54,7 +54,7 @@ async def start_bike_session():
 
 @router.get("/{_id}", response_model=CardioWorkoutResponse)
 async def get_bike_session(_id: int, db: AsyncSession = Depends(get_db)):
-    return get_by_id(_id, db)
+    return await get_by_id(_id, db)
 
 @router.post("", response_model=CardioWorkoutResponse)
 async def create_bike_session(payload: CardioBikeSessionCreate, db: AsyncSession = Depends(get_db)):
