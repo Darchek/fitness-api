@@ -77,7 +77,7 @@ async def get_by_id(_id: int, db: AsyncSession):
         .where(and_(CardioWorkout.id == _id, CardioWorkout.type == "cycling"))
         .order_by(CardioWorkout.created_at)
     )
-    row = result.scalars().first()
+    row = result.scalars().unique().first()
     return row
 
 
