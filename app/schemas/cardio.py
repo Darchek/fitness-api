@@ -8,15 +8,6 @@ class CardioBase(BaseModel):
     id: int
     created_at: Optional[datetime] = None
     workout_date: Optional[datetime] = None
-
-    @field_validator("created_at", "workout_date", mode="before")
-    @classmethod
-    def coerce_to_date(cls, v):
-        if isinstance(v, datetime):
-            return v.date()
-        return v
-
-
     type: str
     distance_km: Optional[float] = None
     duration_min: Optional[float] = None

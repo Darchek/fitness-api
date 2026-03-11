@@ -8,7 +8,7 @@ class CardioWorkout(Base):
     __tablename__ = "cardio_workouts"
 
     id = Column(Integer, primary_key=True)
-    workout_date = Column(Date, nullable=False)
+    workout_date = Column(DateTime, nullable=False)
     type = Column(String, nullable=False)
     distance_km = Column(Float)
     duration_min = Column(Float)
@@ -17,6 +17,6 @@ class CardioWorkout(Base):
     notes = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
 
-    metrics = relationship("BikeMetric", cascade="all, delete-orphan")
+    metrics = relationship("BikeMetric", order_by="BikeMetric.measured_at", cascade="all, delete-orphan")
 
 
