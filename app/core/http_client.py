@@ -32,3 +32,46 @@ class HttpClient:
         except Exception as e:
             log.error(f"Request error: {e}")
             return False
+
+
+    # STRAVA
+
+    @staticmethod
+    async def get_activities():
+        try:
+            headers = {
+                "Authorization": f"Bearer {settings.STRAVA_TOKEN}"
+            }
+            response = requests.get(f"https://www.strava.com/api/v3/activities", headers=headers)
+            res = response.json()
+            return res
+        except Exception as e:
+            log.error(f"Request error: {e}")
+            return False
+
+    @staticmethod
+    async def get_activity(activity_id):
+        try:
+            headers = {
+                "Authorization": f"Bearer {settings.STRAVA_TOKEN}"
+            }
+            response = requests.get(f"https://www.strava.com/api/v3/activities/{activity_id}", headers=headers)
+            res = response.json()
+            return res
+        except Exception as e:
+            log.error(f"Request error: {e}")
+            return False
+
+    @staticmethod
+    async def get_activity_stream(activity_id):
+        try:
+            headers = {
+                "Authorization": f"Bearer {settings.STRAVA_TOKEN}"
+            }
+            response = requests.get(f"https://www.strava.com/api/v3/activities/"
+                                    f"{activity_id}/streams?keys=heartrate&key_by_type=true", headers=headers)
+            res = response.json()
+            return res
+        except Exception as e:
+            log.error(f"Request error: {e}")
+            return False

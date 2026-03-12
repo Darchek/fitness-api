@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = "*"
     N8N_WEBHOOK_URL: str = ""
     N8N_WEBHOOK_URL_DEV: str = ""
+    STRAVA_TOKEN: str = ""
 
     @property
     def allowed_origins_list(self) -> List[str]:

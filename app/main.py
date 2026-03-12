@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import cardio, strength, bike, workouts, weight, habits, stats, auth
+from app.routers import cardio, strength, bike, workouts, weight, habits, stats, auth, strava
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -34,6 +34,7 @@ app.include_router(stats.router)
 app.include_router(weight.router)
 app.include_router(habits.router)
 app.include_router(auth.router)
+app.include_router(strava.router)
 
 
 @app.get("/health")
