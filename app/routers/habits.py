@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from typing import List, Optional
-from datetime import date
-
 from app.core import parse_date
 from app.db.session import get_db
 from app.db.models.habits import HabitLog
