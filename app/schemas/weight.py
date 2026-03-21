@@ -8,6 +8,7 @@ class WeightOut(BaseModel):
     id: int
     measured_at: datetime
     value: float
+    event_name: str
     notes: Optional[str] = None
     created_at: Optional[datetime] = None
 
