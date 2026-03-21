@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
@@ -7,6 +7,19 @@ from app.schemas.auth import AuthRequest, AuthResponse, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+
+def get_current_user(request: Request) -> dict:
+    """Extract user info from Authentik headers."""
+    email = request.headers.get("X-authentik-email")
+    if not email:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return {
+        "uid": request.headers.get("X-authentik-uid"),
+        "username": request.headers.get("X-authentik-username"),
+        "name": request.headers.get("X-authentik-name"),
+        "email": email,
+        "groups": request.headers.get("X-authentik-groups", "").split("|"),
+    }
 
 @router.post("", response_model=AuthResponse)
 async def authenticate(payload: AuthRequest, db: AsyncSession = Depends(get_db)):
@@ -36,3 +49,8 @@ async def authenticate(payload: AuthRequest, db: AsyncSession = Depends(get_db))
         raise HTTPException(status_code=401, detail="Invalid password")
 
     return AuthResponse(user=UserOut(username=user["username"], role=user["role"]))
+
+
+@router.get("/me")
+def me(user: dict = Depends(get_current_user)):
+    return user
