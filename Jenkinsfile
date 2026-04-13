@@ -58,16 +58,19 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'host-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'host-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
+                    string(credentialsId: DEPLOYMENT_PATH, variable: 'DEPLOY_PATH')
+                ]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no -i \$SSH_KEY \$SSH_USER@\${HOST} '
                             export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
                             export DOCKER_BUILDKIT=0
                             set -e
-                            cd ${env.DEPLOYMENT_PATH}/fitness/fitness-api
+                            cd ${DEPLOY_PATH}/fitness/fitness-api
                             git pull origin main
                             /usr/local/bin/docker build -t fitness-api:latest .
-                            cd ${env.DEPLOYMENT_PATH}/fitness
+                            cd ${DEPLOY_PATH}/fitness
                             /usr/local/bin/docker compose up -d --force-recreate fitness-api
                             /usr/local/bin/docker image prune -f
                             echo "fitness-api deploy complete"
