@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends, Query, Body, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from typing import List, Optional, Any
 from datetime import date
 
@@ -49,7 +49,7 @@ async def insert_weight(
     if not weight_kg or not body_fat:
         raise HTTPException(404, "No information available")
 
-    q = select(WeightLog).order_by(WeightLog.measured_at.desc())
+    q = select(WeightLog).where(and_(WeightLog.event_name == 'weight_kg')).order_by(WeightLog.measured_at.desc())
     result = await db.execute(q)
     item = result.scalars().first()
     if not ((item.value * 0.95) < float(weight_kg) < (item.value * 1.05)):
