@@ -15,6 +15,7 @@ pipeline {
         TEST_IMAGE      = "fitness-api-integration-${BUILD_NUMBER}"
         TEST_NET        = "fitness-api-net-${BUILD_NUMBER}"
         TEST_CTR        = "fitness-api-ctr-${BUILD_NUMBER}"
+        DEPLOYMENT_PATH = 'deployment_path'
     }
 
     stages {
@@ -63,10 +64,10 @@ pipeline {
                             export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
                             export DOCKER_BUILDKIT=0
                             set -e
-                            cd /Users/mbusq/deployments/fitness/fitness-api
+                            cd ${DEPLOYMENT_PATH}/fitness/fitness-api
                             git pull origin main
                             /usr/local/bin/docker build -t fitness-api:latest .
-                            cd /Users/mbusq/deployments/fitness
+                            cd ${DEPLOYMENT_PATH}/fitness
                             /usr/local/bin/docker compose up -d --force-recreate fitness-api
                             /usr/local/bin/docker image prune -f
                             echo "fitness-api deploy complete"
