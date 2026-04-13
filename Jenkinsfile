@@ -9,13 +9,12 @@ pipeline {
         DOCKER_CONFIG   = '/var/jenkins_home/.docker'
         DOCKER_BUILDKIT = '0'
         REPO_URL        = 'https://github.com/Darchek/fitness-api.git'
-        DEPLOY_DIR      = '/Users/mbusq/deployments/fitness'
         HOST            = 'host.docker.internal'
         UNIT_TEST_IMAGE = "fitness-api-test-${BUILD_NUMBER}"
         TEST_IMAGE      = "fitness-api-integration-${BUILD_NUMBER}"
         TEST_NET        = "fitness-api-net-${BUILD_NUMBER}"
         TEST_CTR        = "fitness-api-ctr-${BUILD_NUMBER}"
-        DEPLOYMENT_PATH = 'deployment_path'
+        DEPLOY_DIR      = credentials('deployment_path') + '/fitness'
     }
 
     stages {
@@ -59,18 +58,17 @@ pipeline {
         stage('Deploy') {
             steps {
                 withCredentials([
-                    sshUserPrivateKey(credentialsId: 'host-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
-                    string(credentialsId: DEPLOYMENT_PATH, variable: 'DEPLOY_PATH')
+                    sshUserPrivateKey(credentialsId: 'host-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
                 ]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no -i \$SSH_KEY \$SSH_USER@\${HOST} '
                             export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
                             export DOCKER_BUILDKIT=0
                             set -e
-                            cd ${DEPLOY_PATH}/fitness/fitness-api
+                            cd ${DEPLOY_DIR}/fitness-api
                             git pull origin main
                             /usr/local/bin/docker build -t fitness-api:latest .
-                            cd ${DEPLOY_PATH}/fitness
+                            cd ${DEPLOY_DIR}
                             /usr/local/bin/docker compose up -d --force-recreate fitness-api
                             /usr/local/bin/docker image prune -f
                             echo "fitness-api deploy complete"
