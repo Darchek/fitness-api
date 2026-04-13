@@ -64,10 +64,10 @@ pipeline {
                             export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
                             export DOCKER_BUILDKIT=0
                             set -e
-                            cd ${DEPLOYMENT_PATH}/fitness/fitness-api
+                            cd ${env.DEPLOYMENT_PATH}/fitness/fitness-api
                             git pull origin main
                             /usr/local/bin/docker build -t fitness-api:latest .
-                            cd ${DEPLOYMENT_PATH}/fitness
+                            cd ${env.DEPLOYMENT_PATH}/fitness
                             /usr/local/bin/docker compose up -d --force-recreate fitness-api
                             /usr/local/bin/docker image prune -f
                             echo "fitness-api deploy complete"
