@@ -14,7 +14,7 @@ pipeline {
         TEST_IMAGE      = "fitness-api-integration-${BUILD_NUMBER}"
         TEST_NET        = "fitness-api-net-${BUILD_NUMBER}"
         TEST_CTR        = "fitness-api-ctr-${BUILD_NUMBER}"
-        DEPLOY_DIR      = credentials('deployment_path') + '/fitness'
+        DEPLOY_DIR      = credentials('deployment_path') + "/fitness"
     }
 
     stages {
