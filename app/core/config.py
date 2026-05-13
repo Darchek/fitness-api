@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     N8N_WEBHOOK_URL: str = ""
     N8N_WEBHOOK_URL_DEV: str = ""
     STRAVA_TOKEN: str = ""
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = ""
 
     @property
     def allowed_origins_list(self) -> List[str]:
@@ -19,6 +21,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 
 settings = Settings()

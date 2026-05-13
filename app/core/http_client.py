@@ -33,6 +33,17 @@ class HttpClient:
             log.error(f"Request error: {e}")
             return False
 
+    @staticmethod
+    async def send_n8n_msg(msg: str):
+        try:
+            response = requests.post(f"{settings.N8N_WEBHOOK_URL}/bike/msg", json={"msg": msg})
+            res = response.json()
+            log.info(res)
+            return True
+        except Exception as e:
+            log.error(f"Request error: {e}")
+            return False
+
 
     # STRAVA
 
